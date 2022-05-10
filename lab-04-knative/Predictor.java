@@ -4,9 +4,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.camel.BindToRegistry;
+import org.apache.camel.PropertyInject;
 import org.apache.camel.builder.RouteBuilder;
 
-public class BetterPredictor extends RouteBuilder {
+public class Predictor extends RouteBuilder {
 
   @Override
   public void configure() throws Exception {
@@ -28,7 +29,7 @@ public class BetterPredictor extends RouteBuilder {
       from("direct:publish")
         .marshal().json()
         .removeHeaders("*")
-        .setHeader("CE-Type", constant("predictor.better"))
+        .setHeader("CE-Type", constant("predictor.{{predictor.name}}"))
         .to("knative:event");
 
   }
@@ -36,8 +37,9 @@ public class BetterPredictor extends RouteBuilder {
 
   @BindToRegistry("algorithm")
   public static class SimpleAlgorithm {
-	  
-    private double sensitivity = 0.0005;
+
+    @PropertyInject(value="algorithm.sensitivity", defaultValue = "0.0001")
+    private double sensitivity;
 
     private Double previous;
 
